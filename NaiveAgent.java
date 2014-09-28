@@ -117,6 +117,23 @@ public class NaiveAgent implements Runnable {
 						* (p1.y - p2.y)));
 	}
 
+
+	public void List_Blocks(List<ABObject> Blocks)
+	{
+
+		for(ABObject blk: Blocks)
+		{
+
+			if( blk.type.id != 0 )
+			{	System.out.println("ID: " + blk.id);
+				System.out.println("Material Type: " + blk.type);
+				System.out.println("Shape:" + blk.shape);
+				System.out.println();
+				}
+					}					
+		
+	}
+
 	public GameState solve()
 	{
 
@@ -152,7 +169,7 @@ public class NaiveAgent implements Runnable {
 				Shot shot = new Shot();
 				int dx,dy;
 				{
-					VisionRealShape RealShape = new VisionRealShape(screenshot);
+					
 					ABObject max_height_pig = new ABObject();
 					double min = pigs.get(randomGenerator.nextInt(pigs.size())).getCenter().getY();
 						// pick the max height pig
@@ -165,19 +182,10 @@ public class NaiveAgent implements Runnable {
 						}
 					
 					}
+					VisionRealShape RealShape = new VisionRealShape(screenshot);
 					List<ABObject> Blocks;
 					Blocks = RealShape.findObjects();
-					
-					for(ABObject blk: Blocks)
-					{
-
-						if( blk.type.id != 0 )
-						{	System.out.println("ID: " + blk.id);
-							System.out.println("Material Type: " + blk.type);
-							System.out.println("Shape:" + blk.shape);
-							System.out.println();
-							}
-								}					
+					List_Blocks(Blocks);				
 					ABObject pig = max_height_pig;
 					Point _tpt = pig.getCenter();/// if the target is very close to before, randomly choose a
 					// point near it
