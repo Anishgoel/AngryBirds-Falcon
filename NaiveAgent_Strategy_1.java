@@ -166,10 +166,10 @@ public class NaiveAgent implements Runnable {
 						
 						
 
-					int m_wood = 4;
-					int m_ice = 2;
-					int m_stone = 1;
-					int m_pig = 7;
+					int m_wood = 5;
+					int m_ice = 4;
+					int m_stone = 3;
+					int m_pig = 11;
 					
 					List<Rectangle>  stones = MBR.findStonesMBR();
 					List<Rectangle>  woods = MBR.findWoodMBR();
