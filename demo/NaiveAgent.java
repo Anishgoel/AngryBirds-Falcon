@@ -177,12 +177,13 @@ public class NaiveAgent implements Runnable {
 						}
 					}
 
-					System.out.println(near_blk.size() + "  Near blks");
+					//System.out.println(near_blk.size() + "  Near blks");
 
-					for(ABObject bk :near_blk)
+					/*for(ABObject bk :near_blk)
 					{
 						System.out.println(bk.getX() + "   " + bk.getY());
-					}
+					}*/
+
 					double totalMass = 0;
 					int mass = 1;
 					for(ABObject blk : near_blk)
