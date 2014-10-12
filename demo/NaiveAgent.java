@@ -23,7 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
+import java.util.LinkedList;
 import ab.demo.other.ActionRobot;
 import ab.demo.other.Shot;
 import ab.planner.TrajectoryPlanner;
@@ -47,6 +47,7 @@ public class NaiveAgent implements Runnable {
 	private boolean firstShot;
 	private Point prevTarget;
 	// a standalone implementation of the Naive Agent
+	int n;
 	public NaiveAgent() {
 		
 		aRobot = new ActionRobot();
@@ -162,58 +163,54 @@ public class NaiveAgent implements Runnable {
 				int dx,dy;
 				{
 					VisionMBR MBR = new VisionMBR(screenshot);					 
-						
-						
-						
-
-					int m_wood = 5;
-					int m_ice = 4;
-					int m_stone = 3;
-					int m_pig = 11;
-					
-					List<Rectangle>  stones = MBR.findStonesMBR();
-					List<Rectangle>  woods = MBR.findWoodMBR();
-					List<Rectangle>  ice = MBR.findIceMBR();
-					Point COM = new Point();
-					int total_mass = 0;				
-					
-
-					for(Rectangle stone :stones)
+					List<ABObject> blocks = MBR.findBlocks();
+					List<ABObject> near_blk = new LinkedList<ABObject>();
+					//List<ABObject> pigs = MBR.findPigsMBR();
+					Point com = new Point();
+					for(ABObject pig : pigs)
 					{
-						COM.x += stone.width*stone.height*m_stone*(stone.getX());
-						COM.y += stone.width*stone.height*m_stone*(stone.getY());
-						total_mass +=  stone.width*stone.height*m_stone;
+						for(ABObject bk : blocks)
+						{
+							if((bk.getX() >= (pig.getX() - pig.width)) || (bk.getX() <= (pig.getX() + 2*pig.width)))
+									if((bk.getY() >= (pig.getY() - 2*pig.height ))/* || (bk.getY() <= (pig.getY() + 3*pig.height))*/)
+										near_blk.add(bk);
+						}
 					}
 
+					System.out.println(near_blk.size() + "  Near blks");
 
-					for(Rectangle wood :woods)
+					for(ABObject bk :near_blk)
 					{
-						COM.x += wood.width*wood.height*m_wood*(wood.getX());
-						COM.y += wood.width*wood.height*m_wood*(wood.getY());
-						total_mass	+= 	wood.width*wood.height*m_wood;
-								}
-
-					for(Rectangle ICE :ice)
-					{
-						COM.x += ICE.width*ICE.height*m_ice*(ICE.getX()) ;
-						COM.y += ICE.width*ICE.height*m_ice*(ICE.getY());
-						total_mass += ICE.width*ICE.height*m_ice;
+						System.out.println(bk.getX() + "   " + bk.getY());
 					}
+					double totalMass = 0;
+					int mass = 1;
+					for(ABObject blk : near_blk)
+					{
+						if(blk.type.id == 12)
+							mass = 6;
+						else if(blk.type.id == 11)
+							mass = 7;
+						else
+							mass = 6;
 
+
+						com.x += (blk.width*blk.height)*mass*blk.getCenter().getX();
+						com.x += (blk.width*blk.height)*mass*blk.getCenter().getY();
+						totalMass += (blk.width*blk.height)*mass;
+					}
+					double blkMass = totalMass;
 					for(ABObject pig :pigs)
 					{
-						COM.x += pig.width*pig.height*m_pig*(pig.getX() );
-						COM.y += pig.width*pig.height*m_pig*( pig.getY());
-						total_mass += pig.width*pig.height*m_pig;
-					}
+						com.x += 12*(pig.width*pig.height)*(pig.getCenter().getX() );
+						com.y += 12*(pig.width*pig.height)*( pig.getCenter().getY());
+						totalMass += 12*(pig.width*pig.height);
+					}			
 
-
-					
-					COM.x = (int)COM.getX()/total_mass;
-					COM.y = (int)COM.getY()/total_mass;
-
-
-					System.out.println("com : " + COM.x + "    --   " + COM.y);
+					com.x = (int)(com.x*(blkMass/totalMass))/(int)totalMass;
+					com.y = (int)(com.y*(blkMass/totalMass))/(int)totalMass;
+				
+					System.out.println(com.x + "    --   " + com.y);
 					ABObject max_height_pig = new ABObject();
 					int y = (randomGenerator.nextInt(pigs.size()));
 					//System.out.println(colors[(int)pigs.get(y).getCenter().getY()][(int)pigs.get(y).getCenter().getX()]);
@@ -224,25 +221,25 @@ public class NaiveAgent implements Runnable {
 
 
 						// pick the max height pig
-					double min = distance(COM, P);
+					double min = distance(com, P);
 					System.out.println("min" + min);
 					Point  p = new Point();
 					for(ABObject pig : pigs)
 					{
 						P.x = (int)pig.getCenter().getX();
 						P.y = (int)pig.getCenter().getY();
-						if(distance(COM, p) <= min)
+						if(distance(com, p) <= min)
 						{
 							max_height_pig = pig;
-							min = distance(COM, p);
+							min = distance(com, p);
 						}
 					
 					}
 					
-
+					System.out.println("MIN" + min);
 					Point _tpt = new Point();
 					ABObject pig;
-					if(min > 100)
+					if(min > 120)
 					{
 					  pig = max_height_pig;
 					 _tpt = pig.getCenter();/// if the target is very close to before, randomly choose a
@@ -250,16 +247,16 @@ public class NaiveAgent implements Runnable {
 					// point near it
 					else
 					{
-					_tpt = COM;
+					_tpt = com;
 					}
-					List<ABObject> blocks = MBR.findBlocks();
 					System.out.println("target :" + _tpt.x + "   " + _tpt.y);
 					int flag = 0;
+
 					for(ABObject block : blocks)
 					{
 						if(block.getCenter().getX() <= _tpt.x)
 						{	
-							if(Math.abs(block.getCenter().getY() - _tpt.y) > 70) 
+							if(Math.abs(block.getCenter().getY() - _tpt.y) > 80) 
 							{
 								System.out.println(block.getCenter().getX() + "   " + block.getCenter().getY());
 								flag = 1;
@@ -275,27 +272,44 @@ public class NaiveAgent implements Runnable {
 					}
 
 					prevTarget = new Point(_tpt.x, _tpt.y);
-					//System.out.println(_tpt.x + "   " + _tpt.y);
+					
 					// estimate the trajectory
 					ArrayList<Point> pts = tp.estimateLaunchPoint(sling, _tpt);
 					//System.out.println("Size  "+pts.size());
 					//System.out.println(pts.get(0).getX() + "  " + pts.get(0).getY());
 					// do a high shot when entering a level to find an accurate velocity
+					for(Point pt: pts)
+					{
+						System.out.println(pt.x + "  " + pt.y);
+					}
+
 					if(!pts.isEmpty())
 					{
 						if(flag == 0)
 						releasePoint = pts.get(0);
 						else	
+						/*if (firstShot && pts.size() > 1) 
+						{
+							releasePoint = pts.get(1);
+						}
+						*/
 						{	/*else*/
 							 if (pts.size() == 1)
 								releasePoint = pts.get(0);
 							else if (pts.size() == 2)
-							
+							{
+							// randomly choose between the trajectories, with a 1 in
+							// 6 chance of choosing the high one
+								//if (randomGenerator.nextInt(6) == 0)
 										releasePoint = pts.get(1);
-								}
+								/*	else
+										releasePoint = pts.get(0);
+								*/}
 									}
+					}
 					else
-					{
+						if(pts.isEmpty())
+						{
 							System.out.println("No release point found for the target");
 							System.out.println("Try a shot with 45 degree");
 							releasePoint = tp.findReleasePoint(sling, Math.PI/4);
