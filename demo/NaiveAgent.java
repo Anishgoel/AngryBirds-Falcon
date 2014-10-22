@@ -298,22 +298,20 @@ public class NaiveAgent implements Runnable {
 						}
 						double maxY=MBR._nHeight;
 						double maxX=MBR._nWidth;
-						int c=0;
 						for(Rectangle wood :woods)
 						{
-							if(wood.getY()<maxY && wood.getX()==max_x ){
+							if(wood.getY()>max_y && wood.getX()==max_x ){
 								maxY=wood.getY();
 								maxX=wood.getX();
-								c++;
+								pig = max_height_pig;
+							_tpt.x = (int)maxX;
+						 	_tpt.y=(int)maxY; 
 								
 							}
 							
 						}
-						if(c>0){
-							pig = max_height_pig;
-							_tpt.x = (int)maxX;
-						 	_tpt.y=(int)maxY; 
-						 }	
+							
+
 						// level 1 optimized
 					}
 
