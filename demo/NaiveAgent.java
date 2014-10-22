@@ -152,6 +152,8 @@ public class NaiveAgent implements Runnable {
 
 		GameState state = aRobot.getState();
 
+
+
 		// if there is a sling, then play, otherwise just skip.
 		if (sling != null) {
 
@@ -226,15 +228,15 @@ public class NaiveAgent implements Runnable {
 						// pick the max height pig
 					double min = distance(COM, P);
 					System.out.println("min" + min);
-					Point  p = new Point();
+					
 					for(ABObject pig : pigs)
 					{
 						P.x = (int)pig.getCenter().getX();
 						P.y = (int)pig.getCenter().getY();
-						if(distance(COM, p) <= min)
+						if(distance(COM, P) <= min)
 						{
 							max_height_pig = pig;
-							min = distance(COM, p);
+							min = distance(COM, P);
 						}
 					
 					}
@@ -266,7 +268,55 @@ public class NaiveAgent implements Runnable {
 								break;
 							}
 						}
+					 }
+					// optimizing level 1
+					if(pigs.size()==1){
+
+						double max_y = MBR._nHeight;
+						double max_x=MBR._nWidth;
+
+						for(ABObject pig1 : pigs)
+						{
+							
+							max_y = (int)pig1.getCenter().getY();
+							max_x = (int)pig1.getCenter().getX();
+							// if(P.y < max_y)
+							// {
+							// 	max_height_pig = pig1;
+							// 	max_y = P.y;
+							// }
+							// else if(P.y == max_y)
+							// {
+							// 	if(max_x>P.x)
+							// 	{
+							// 		max_height_pig = pig1;
+							// 		max_y = P.y;
+							// 		max_x=P.x;
+							// 	}
+							// }
+
+						}
+						double maxY=MBR._nHeight;
+						double maxX=MBR._nWidth;
+						int c=0;
+						for(Rectangle wood :woods)
+						{
+							if(wood.getY()<maxY && wood.getX()==max_x ){
+								maxY=wood.getY();
+								maxX=wood.getX();
+								c++;
+								
+							}
+							
+						}
+						if(c>0){
+							pig = max_height_pig;
+							_tpt.x = (int)maxX;
+						 	_tpt.y=(int)maxY; 
+						 }	
+						// level 1 optimized
 					}
+
 					if (prevTarget != null && distance(prevTarget, _tpt) < 10) {
 						double _angle = randomGenerator.nextDouble() * Math.PI * 2;
 						_tpt.x = _tpt.x + (int) (Math.cos(_angle) * 10);
