@@ -272,41 +272,45 @@ public class NaiveAgent implements Runnable {
 					// optimizing level 1
 					if(pigs.size()==1){
 
+						System.out.println("KKKKKKKKKKKKKKKKKKKin");
+
 						double max_y = MBR._nHeight;
 						double max_x=MBR._nWidth;
 
-						for(ABObject pig1 : pigs)
-						{
+						 for(ABObject pig1 : pigs)
+						 {
 							
-							max_y = (int)pig1.getCenter().getY();
-							max_x = (int)pig1.getCenter().getX();
-							// if(P.y < max_y)
-							// {
-							// 	max_height_pig = pig1;
-							// 	max_y = P.y;
-							// }
-							// else if(P.y == max_y)
-							// {
-							// 	if(max_x>P.x)
-							// 	{
-							// 		max_height_pig = pig1;
-							// 		max_y = P.y;
-							// 		max_x=P.x;
-							// 	}
-							// }
+						 	max_y = (int)pig1.getCenter().getY();
+						 	max_x = (int)pig1.getCenter().getX();
+						// 	if(P.y < max_y)
+						// 	{
+						// 		max_height_pig = pig1;
+						// 		max_y = P.y;
+						// 	}
+						// 	else if(P.y == max_y)
+						// 	{
+						// 		if(max_x>P.x)
+						// 		{
+						// 			max_height_pig = pig1;
+						// 			max_y = P.y;
+						// 			max_x=P.x;
+						// 		}
+						// 	}
 
-						}
+					 }
 						double maxY=MBR._nHeight;
 						double maxX=MBR._nWidth;
+						double maxWidth=0;
 						for(Rectangle wood :woods)
 						{
-							if(wood.getY()>max_y && wood.getX()==max_x ){
+							if(wood.getY()>=max_y && wood.width>=maxWidth){
 								maxY=wood.getY();
 								maxX=wood.getX();
 								pig = max_height_pig;
+								maxWidth=wood.width;
 							_tpt.x = (int)maxX;
 						 	_tpt.y=(int)maxY; 
-								
+								//_tpt=wood.getCenter();
 							}
 							
 						}
