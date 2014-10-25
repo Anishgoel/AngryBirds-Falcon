@@ -1,12 +1,3 @@
-/*****************************************************************************
- ** ANGRYBIRDS AI AGENT FRAMEWORK
- ** Copyright (c) 2014, XiaoYu (Gary) Ge, Stephen Gould, Jochen Renz
- **  Sahan Abeyasinghe,Jim Keys,  Andrew Wang, Peng Zhang
- ** All rights reserved.
- **This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. 
- **To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ 
- *or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
- *****************************************************************************/
 package ab.demo;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -240,6 +231,7 @@ public class NaiveAgent implements Runnable {
 			return com;
 					
 		}
+
 	public Point COM1(BufferedImage screenshot)
 	{
 		Vision vision = new Vision(screenshot);
@@ -391,11 +383,11 @@ public class NaiveAgent implements Runnable {
 
 					}
 
-					for(ABObject bas : BASES)
+/*					for(ABObject bas : BASES)
 					{
 						System.out.println(bas.type + "   " + bas.getX() + "   " + bas.getY());
 					}
-
+*/
 					if(flg == 1)
 					{	COM.x = (int)base.getX();
 						COM.y = (int)base.getY();
@@ -413,7 +405,7 @@ public class NaiveAgent implements Runnable {
 					}
 						}
 					//flg = 0;
-					System.out.println("FLAG : " + flg);
+					//System.out.println("FLAG : " + flg);
 					
 					if(flg == 0)
 					{
@@ -431,7 +423,7 @@ public class NaiveAgent implements Runnable {
 
 						// pick the max height pig
 					double min = distance(COM, P);
-					System.out.println("min" + min);
+					//System.out.println("min" + min);
 					
 					for(ABObject pig : pigs)
 					{
@@ -460,7 +452,7 @@ public class NaiveAgent implements Runnable {
 					}
 					
 				
-					System.out.println("target :" + _tpt.x + "   " + _tpt.y);
+					//System.out.println("target :" + _tpt.x + "   " + _tpt.y);
 					int flag = 0;
 					for(ABObject block : blocks)
 					{
@@ -474,7 +466,7 @@ public class NaiveAgent implements Runnable {
 							}
 						}
 					 }
-					 System.out.println("target point : " + _tpt.x +   "    "  + _tpt.y);
+					System.out.println("target point : " + _tpt.x +   "    "  + _tpt.y);
 					// optimizing for a single pig left
 
 					//System.out.println("Final target point : " + _tpt.x +   "    "  + _tpt.y);
@@ -608,39 +600,3 @@ public class NaiveAgent implements Runnable {
 
 	}
 }
-
-
-
-
-
-
-/*if(pigs.size()==1){
-						ABObject Supports = new ABObject();
-						int fg = 0;
-						int min_x = MBR._nWidth;
-						ABObject OnlyPig = new ABObject();
-						OnlyPig = pigs.get(0);
-						for(ABObject blk :blocks)
-						{
-							if((OnlyPig.getY() + OnlyPig.height + 2 >= blk.getY()) && (blk.getY()>= OnlyPig.getY()  + OnlyPig.height) && (blk.getX() >= OnlyPig.getX() - 4*OnlyPig.width) && (blk.getX() <= OnlyPig.getX() + 4*OnlyPig.width))
-									{		
-										fg = 1;
-											if(blk.getX() < min_x)
-											{
-												Supports = blk;
-												min_x = (int)blk.getX();
-											}								
-											
-										}
-											
-						}
-						if(Supports.type.id == 12)
-							fg = 0;
-						if(fg == 1)
-						{
-							System.out.println("ONE PIG LEFT!");
-						_tpt.x = (int)Supports.getX();
-						_tpt.y = (int)Supports.getY();
-							}
-						// level 1 optimized
-					}*/
