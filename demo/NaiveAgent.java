@@ -162,7 +162,10 @@ public class NaiveAgent implements Runnable {
 				Shot shot = new Shot();
 				int dx,dy;
 				{
+					int screen_height = screenshot.getHeight();
+					System.out.println("Height of Screen :" + screenshot.getHeight());
 					VisionMBR MBR = new VisionMBR(screenshot);					 
+					//System.out.println("Height of Screen :" + MBR.getHeight());
 					List<ABObject> blocks = MBR.findBlocks();
 					List<ABObject> near_blk = new LinkedList<ABObject>();
 					//List<ABObject> pigs = MBR.findPigsMBR();
@@ -177,35 +180,33 @@ public class NaiveAgent implements Runnable {
 						}
 					}
 
-					//System.out.println(near_blk.size() + "  Near blks");
+					System.out.println(near_blk.size() + "  Near blks");
 
-					/*for(ABObject bk :near_blk)
+					for(ABObject bk :near_blk)
 					{
 						System.out.println(bk.getX() + "   " + bk.getY());
-					}*/
-
+					}
 					double totalMass = 0;
 					int mass = 1;
 					for(ABObject blk : near_blk)
 					{
 						if(blk.type.id == 12)
-							mass = 6;
+							mass = 4;
 						else if(blk.type.id == 11)
-							mass = 7;
+							mass = 8;
 						else
-							mass = 6;
-
+							mass = 4;
 
 						com.x += (blk.width*blk.height)*mass*blk.getCenter().getX();
-						com.x += (blk.width*blk.height)*mass*blk.getCenter().getY();
+						com.y += (blk.width*blk.height)*mass*(screen_height - blk.getCenter().getY());
 						totalMass += (blk.width*blk.height)*mass;
 					}
 					double blkMass = totalMass;
 					for(ABObject pig :pigs)
 					{
-						com.x += 12*(pig.width*pig.height)*(pig.getCenter().getX() );
-						com.y += 12*(pig.width*pig.height)*( pig.getCenter().getY());
-						totalMass += 12*(pig.width*pig.height);
+						com.x += 15*(pig.width*pig.height)*(pig.getCenter().getX() );
+						com.y += 15*(pig.width*pig.height)*(screen_height - pig.getCenter().getY());
+						totalMass += 15*(pig.width*pig.height);
 					}			
 
 					com.x = (int)(com.x*(blkMass/totalMass))/(int)totalMass;
@@ -257,7 +258,7 @@ public class NaiveAgent implements Runnable {
 					{
 						if(block.getCenter().getX() <= _tpt.x)
 						{	
-							if(Math.abs(block.getCenter().getY() - _tpt.y) > 80) 
+							if(/*(screen_height -block.getCenter().getY())*block.getCenter().getX() > _tpt.x*(screen_height - _tpt.y))*/Math.abs(block.getCenter().getY() - _tpt.y) > 80) 
 							{
 								System.out.println(block.getCenter().getX() + "   " + block.getCenter().getY());
 								flag = 1;
