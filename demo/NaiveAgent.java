@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.LinkedList;
+
 import ab.demo.other.ActionRobot;
 import ab.demo.other.Shot;
 import ab.planner.TrajectoryPlanner;
@@ -47,7 +48,6 @@ public class NaiveAgent implements Runnable {
 	private boolean firstShot;
 	private Point prevTarget;
 	// a standalone implementation of the Naive Agent
-	int n;
 	public NaiveAgent() {
 		
 		aRobot = new ActionRobot();
@@ -127,6 +127,190 @@ public class NaiveAgent implements Runnable {
 						* (p1.y - p2.y)));
 	}
 
+	public Point COM2(BufferedImage screenshot)
+	{
+		Vision vision = new Vision(screenshot);
+		VisionMBR MBR = new VisionMBR(screenshot);					 
+		List<ABObject> pigs = vision.findPigsMBR();
+		 
+		int m_wood = 5;
+		int m_ice = 4;
+		int m_stone = 3;
+		int m_pig = 11;
+										
+			List<Rectangle>  stones = MBR.findStonesMBR();
+			List<Rectangle>  woods = MBR.findWoodMBR();
+			List<Rectangle>  ice = MBR.findIceMBR();
+			Point COM = new Point();
+			int total_mass = 0;				
+
+
+
+
+			for(Rectangle stone :stones)
+			{
+				COM.x += stone.width*stone.height*m_stone*(stone.getX());
+				COM.y += stone.width*stone.height*m_stone*(MBR._nHeight  -  stone.getY());
+				total_mass +=  stone.width*stone.height*m_stone;
+			}
+
+
+			for(Rectangle wood :woods)
+			{
+				COM.x += wood.width*wood.height*m_wood*(wood.getX());
+				COM.y += wood.width*wood.height*m_wood*(MBR._nHeight  -  wood.getY());
+				total_mass	+= 	wood.width*wood.height*m_wood;
+						}
+
+			for(Rectangle ICE :ice)
+			{
+				COM.x += ICE.width*ICE.height*m_ice*(ICE.getX()) ;
+				COM.y += ICE.width*ICE.height*m_ice*(MBR._nHeight  -  ICE.getY());
+				total_mass += ICE.width*ICE.height*m_ice;
+			}
+
+			for(ABObject pig :pigs)
+			{
+				COM.x += pig.width*pig.height*m_pig*(pig.getX() );
+				COM.y += pig.width*pig.height*m_pig*(MBR._nHeight  -  pig.getY());
+				total_mass += pig.width*pig.height*m_pig;
+			}
+
+
+			
+			COM.x = (int)COM.getX()/total_mass;
+			COM.y = (int)COM.getY()/total_mass;
+			return COM;
+}
+
+	public Point COM3(BufferedImage screenshot)
+	{
+		Vision vision = new Vision(screenshot);
+		VisionMBR MBR = new VisionMBR(screenshot);					 
+		List<ABObject> pigs = vision.findPigsMBR();
+		
+
+		int screen_height = MBR._nHeight;
+		List<ABObject> blocks = MBR.findBlocks();
+		List<ABObject> near_blk = new LinkedList<ABObject>();
+					
+			Point com = new Point();
+			for(ABObject pig : pigs)
+			{
+				for(ABObject bk : blocks)
+				{
+					if((bk.getX() >= (pig.getX() - pig.width)) || (bk.getX() <= (pig.getX() + 2*pig.width)))
+							if((bk.getY() >= (pig.getY() - 2*pig.height ))/* || (bk.getY() <= (pig.getY() + 3*pig.height))*/)
+								near_blk.add(bk);
+				}
+			}
+
+			System.out.println(near_blk.size() + "  Near blks");
+
+			for(ABObject bk :near_blk)
+			{
+				System.out.println(bk.getX() + "   " + bk.getY());
+			}
+			
+			double totalMass = 0;
+			int mass = 1;
+			for(ABObject blk : near_blk)
+			{
+				if(blk.type.id == 12)
+					mass = 4;
+				else if(blk.type.id == 11)
+					mass = 8;
+				else
+					mass = 4;
+
+				com.x += (blk.width*blk.height)*mass*blk.getCenter().getX();
+				com.y += (blk.width*blk.height)*mass*(screen_height - blk.getCenter().getY());
+				totalMass += (blk.width*blk.height)*mass;
+			}
+			double blkMass = totalMass;
+			for(ABObject pig :pigs)
+			{
+				com.x += 15*(pig.width*pig.height)*(pig.getCenter().getX() );
+				com.y += 15*(pig.width*pig.height)*(screen_height - pig.getCenter().getY());
+				totalMass += 15*(pig.width*pig.height);
+			}			
+
+			com.x = (int)(com.x*(blkMass/totalMass))/(int)totalMass;
+			com.y = (int)(com.y*(blkMass/totalMass))/(int)totalMass;
+			return com;
+					
+		}
+	public Point COM1(BufferedImage screenshot)
+	{
+		Vision vision = new Vision(screenshot);
+		VisionMBR MBR = new VisionMBR(screenshot);					 
+		List<ABObject> pigs = vision.findPigsMBR();
+		
+		Rectangle piggy = new Rectangle();
+		Point COM = new Point();
+		Point tmp1 = new Point();
+		Point tmp2 = new Point();
+		int min_dist = 0;
+		int m_bk = 100;
+		int MAX_X = 0;
+		int tot_mass = 0;
+		List<ABObject> blocks = MBR.findBlocks();
+		for(ABObject bk : blocks)
+			{
+							m_bk = 100;
+							MAX_X = 0;
+							tmp1.x = (int)bk.getX();
+							tmp1.y = (int)bk.getY();
+							min_dist = MBR._nWidth;
+							for(Rectangle pg : pigs)
+							{
+								tmp2.x = (int)pg.getX();
+								tmp2.y = (int)pg.getY();
+								if(distance(tmp1, tmp2) < min_dist)
+								{
+									min_dist =(int) distance(tmp1, tmp2);
+									piggy = pg;
+								}
+							if(pg.getX()  > MAX_X)
+								MAX_X = (int)pg.getX();
+								
+							}
+								tmp2.x = (int)piggy.getX();
+								tmp2.y = (int)piggy.getY();
+							//if(bk.type.id == 12)
+							m_bk = ((100 - (int)Math.abs(piggy.getY() - bk.getY())))/2;//(int)distance(tmp2, tmp1));
+							/*else if(bk.type.id == 11)
+							m_bk = (100 - (int)distance(tmp2, tmp1));
+							else if(bk.type.id == 10)
+							m_bk = (100 - (int)distance(tmp2, tmp1));
+							*/
+							
+								
+							if(bk.getX() <= MAX_X + 10)
+							{
+							COM.x += bk.width*bk.height*m_bk*(bk.getX());
+							COM.y += bk.width*bk.height*m_bk*(bk.getY());
+							tot_mass += bk.width*bk.height*m_bk;
+							}
+									
+						
+					}
+					m_bk = 100;
+					for(Rectangle bk : pigs)
+					{
+							COM.x += bk.width*bk.height*m_bk*(bk.getX());
+							COM.y += bk.width*bk.height*m_bk*(bk.getY());
+							tot_mass += bk.width*bk.height*m_bk;	
+							
+					}
+					COM.x = (int)COM.x/tot_mass;
+					COM.y = (int)COM.y/tot_mass;
+					
+					System.out.println("com : " + COM.x + "    --   " + COM.y);
+					return COM;
+
+	}
+
 	public GameState solve()
 	{
 
@@ -153,6 +337,8 @@ public class NaiveAgent implements Runnable {
 
 		GameState state = aRobot.getState();
 
+
+
 		// if there is a sling, then play, otherwise just skip.
 		if (sling != null) {
 
@@ -162,110 +348,136 @@ public class NaiveAgent implements Runnable {
 				Shot shot = new Shot();
 				int dx,dy;
 				{
-					int screen_height = screenshot.getHeight();
-					System.out.println("Height of Screen :" + screenshot.getHeight());
 					VisionMBR MBR = new VisionMBR(screenshot);					 
-					//System.out.println("Height of Screen :" + MBR.getHeight());
+
+
+					Point COM = new Point();
+					Point tmp1 = new Point();
+					Point tmp2 = new Point();
+					Rectangle piggy = new Rectangle();
+					COM.x = 0;
+					COM.y = 0;
+					int tot_mass = 0;
+					int m_bk = 100;
+					double min_dist = MBR._nWidth;
 					List<ABObject> blocks = MBR.findBlocks();
-					List<ABObject> near_blk = new LinkedList<ABObject>();
-					//List<ABObject> pigs = MBR.findPigsMBR();
-					Point com = new Point();
-					for(ABObject pig : pigs)
+					int MAX_X = 0;
+					int M = MBR._nWidth;
+					ABObject base = new ABObject();
+					int flg = 0;
+					List<ABObject> BASES = MBR.findBlocks();
+					BASES.clear();
+					for(ABObject b : blocks)
 					{
-						for(ABObject bk : blocks)
+						for(Rectangle p : pigs)
 						{
-							if((bk.getX() >= (pig.getX() - pig.width)) || (bk.getX() <= (pig.getX() + 2*pig.width)))
-									if((bk.getY() >= (pig.getY() - 2*pig.height ))/* || (bk.getY() <= (pig.getY() + 3*pig.height))*/)
-										near_blk.add(bk);
+							if((b.type.id != 12) &&((b.getY() <= p.getY() + p.height + 3) && (b.getY() >= p.getY() + p.height)) &&((b.getX() >= p.getX() - 4*p.width) && (b.getX() <= p.getX() + 4*p.width)))
+								{	BASES.add(b);
+									if(b.getX() <= M )
+									{	flg = 1;
+										if(b.getX() == M)
+										{
+											if(b.getY()  > base.getY())
+												base = b;
+										}
+										else
+										{	
+										M =(int) b.getX();
+										base = b;
+										}
+									}
+								}
 						}
+
 					}
 
-					System.out.println(near_blk.size() + "  Near blks");
-
-					for(ABObject bk :near_blk)
+					for(ABObject bas : BASES)
 					{
-						System.out.println(bk.getX() + "   " + bk.getY());
+						System.out.println(bas.type + "   " + bas.getX() + "   " + bas.getY());
 					}
-					double totalMass = 0;
-					int mass = 1;
-					for(ABObject blk : near_blk)
-					{
-						if(blk.type.id == 12)
-							mass = 4;
-						else if(blk.type.id == 11)
-							mass = 8;
-						else
-							mass = 4;
 
-						com.x += (blk.width*blk.height)*mass*blk.getCenter().getX();
-						com.y += (blk.width*blk.height)*mass*(screen_height - blk.getCenter().getY());
-						totalMass += (blk.width*blk.height)*mass;
+					if(flg == 1)
+					{	COM.x = (int)base.getX();
+						COM.y = (int)base.getY();
+						System.out.println(base.type + "   " + COM.x  + "   ---BASE---   " + COM.y);
+						
+					
+					for(ABObject blk : blocks)
+					{
+						if(blk.getX() < base.getX())
+						{
+							if(blk.getY() < base.getY() && (blk.getY()  + blk.height) >= base.getY())
+								flg = 0;
+						}
+
 					}
-					double blkMass = totalMass;
-					for(ABObject pig :pigs)
+						}
+					//flg = 0;
+					System.out.println("FLAG : " + flg);
+					
+					if(flg == 0)
 					{
-						com.x += 15*(pig.width*pig.height)*(pig.getCenter().getX() );
-						com.y += 15*(pig.width*pig.height)*(screen_height - pig.getCenter().getY());
-						totalMass += 15*(pig.width*pig.height);
-					}			
-
-					com.x = (int)(com.x*(blkMass/totalMass))/(int)totalMass;
-					com.y = (int)(com.y*(blkMass/totalMass))/(int)totalMass;
-				
-					System.out.println(com.x + "    --   " + com.y);
-					ABObject max_height_pig = new ABObject();
+						COM = COM3(screenshot);
+					System.out.println("com : " + COM.x + "    --   " + COM.y);
+					}
+					ABObject closest_pig = new ABObject();
 					int y = (randomGenerator.nextInt(pigs.size()));
 					//System.out.println(colors[(int)pigs.get(y).getCenter().getY()][(int)pigs.get(y).getCenter().getX()]);
 					Point  P = new Point();
 						P.x = (int)pigs.get(y).getCenter().getX();
 						P.y = (int)pigs.get(y).getCenter().getY();
-						max_height_pig = pigs.get(y);
+						closest_pig = pigs.get(y);
 
 
 						// pick the max height pig
-					double min = distance(com, P);
+					double min = distance(COM, P);
 					System.out.println("min" + min);
-					Point  p = new Point();
+					
 					for(ABObject pig : pigs)
 					{
 						P.x = (int)pig.getCenter().getX();
 						P.y = (int)pig.getCenter().getY();
-						if(distance(com, p) <= min)
+						if(distance(COM, P) <= min)
 						{
-							max_height_pig = pig;
-							min = distance(com, p);
+							closest_pig = pig;
+							min = distance(COM, P);
 						}
 					
 					}
 					
-					System.out.println("MIN" + min);
+
 					Point _tpt = new Point();
 					ABObject pig;
-					if(min > 120)
+					if(min > 100)
 					{
-					  pig = max_height_pig;
+					  pig = closest_pig;
 					 _tpt = pig.getCenter();/// if the target is very close to before, randomly choose a
 					}
 					// point near it
 					else
 					{
-					_tpt = com;
+					_tpt = COM;
 					}
+					
+				
 					System.out.println("target :" + _tpt.x + "   " + _tpt.y);
 					int flag = 0;
-
 					for(ABObject block : blocks)
 					{
 						if(block.getCenter().getX() <= _tpt.x)
 						{	
-							if(/*(screen_height -block.getCenter().getY())*block.getCenter().getX() > _tpt.x*(screen_height - _tpt.y))*/Math.abs(block.getCenter().getY() - _tpt.y) > 80) 
+							if(Math.abs(block.getCenter().getY() - _tpt.y) > 70) 
 							{
 								System.out.println(block.getCenter().getX() + "   " + block.getCenter().getY());
 								flag = 1;
 								break;
 							}
 						}
-					}
+					 }
+					 System.out.println("target point : " + _tpt.x +   "    "  + _tpt.y);
+					// optimizing for a single pig left
+
+					//System.out.println("Final target point : " + _tpt.x +   "    "  + _tpt.y);
 					if (prevTarget != null && distance(prevTarget, _tpt) < 10) {
 						double _angle = randomGenerator.nextDouble() * Math.PI * 2;
 						_tpt.x = _tpt.x + (int) (Math.cos(_angle) * 10);
@@ -280,38 +492,21 @@ public class NaiveAgent implements Runnable {
 					//System.out.println("Size  "+pts.size());
 					//System.out.println(pts.get(0).getX() + "  " + pts.get(0).getY());
 					// do a high shot when entering a level to find an accurate velocity
-					for(Point pt: pts)
-					{
-						System.out.println(pt.x + "  " + pt.y);
-					}
-
 					if(!pts.isEmpty())
 					{
 						if(flag == 0)
 						releasePoint = pts.get(0);
 						else	
-						/*if (firstShot && pts.size() > 1) 
-						{
-							releasePoint = pts.get(1);
-						}
-						*/
 						{	/*else*/
 							 if (pts.size() == 1)
 								releasePoint = pts.get(0);
 							else if (pts.size() == 2)
-							{
-							// randomly choose between the trajectories, with a 1 in
-							// 6 chance of choosing the high one
-								//if (randomGenerator.nextInt(6) == 0)
+							
 										releasePoint = pts.get(1);
-								/*	else
-										releasePoint = pts.get(0);
-								*/}
+								}
 									}
-					}
 					else
-						if(pts.isEmpty())
-						{
+					{
 							System.out.println("No release point found for the target");
 							System.out.println("Try a shot with 45 degree");
 							releasePoint = tp.findReleasePoint(sling, Math.PI/4);
@@ -413,3 +608,39 @@ public class NaiveAgent implements Runnable {
 
 	}
 }
+
+
+
+
+
+
+/*if(pigs.size()==1){
+						ABObject Supports = new ABObject();
+						int fg = 0;
+						int min_x = MBR._nWidth;
+						ABObject OnlyPig = new ABObject();
+						OnlyPig = pigs.get(0);
+						for(ABObject blk :blocks)
+						{
+							if((OnlyPig.getY() + OnlyPig.height + 2 >= blk.getY()) && (blk.getY()>= OnlyPig.getY()  + OnlyPig.height) && (blk.getX() >= OnlyPig.getX() - 4*OnlyPig.width) && (blk.getX() <= OnlyPig.getX() + 4*OnlyPig.width))
+									{		
+										fg = 1;
+											if(blk.getX() < min_x)
+											{
+												Supports = blk;
+												min_x = (int)blk.getX();
+											}								
+											
+										}
+											
+						}
+						if(Supports.type.id == 12)
+							fg = 0;
+						if(fg == 1)
+						{
+							System.out.println("ONE PIG LEFT!");
+						_tpt.x = (int)Supports.getX();
+						_tpt.y = (int)Supports.getY();
+							}
+						// level 1 optimized
+					}*/
