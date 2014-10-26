@@ -284,16 +284,39 @@ public Point COM4(BufferedImage screenshot)
 		VisionMBR MBR = new VisionMBR(screenshot);					 
 		List<ABObject> pigs = vision.findPigsMBR();
 		List<ABObject> blocks = MBR.findBlocks();
-		
-			
+		System.out.println("IN TAP " + _tpt.x);
+
+		for(ABObject blk : blocks)
+		{
+			if(blk.getX() < _tpt.x)
+			{
+				if(blk.getY() <= _tpt.y && blk.getY()  + blk.height  >= _tpt.y)
+					_tpt.x = (int)blk.getX();
+			}	
+		}
+	System.out.println("IN TAP " + _tpt.x);			
 		List<Point> trajectory = tp.predictTrajectory(sling, pt);
 		
 		List<Point> traj_to_target = new LinkedList<Point>();
-			for(int k= 0; k<trajectory.size(); k++)
+			int k= 0;
+			double per = 0.10;
+			switch (aRobot.getBirdTypeOnSling()) 
+						{
+
+						case RedBird:
+							per = 0; break;               // start of trajectory
+						case YellowBird:
+							per = 0.2 ; break; // 65-90% of the way
+						case BlueBird:
+							per = 0.1;  break; // 60-70% of the way
+						default:
+							per =  0.1;
+						}
+			for(k= 0; k<trajectory.size(); k++)
 			{
 
 	
-					if(trajectory.get(k).getX() <= _tpt.x)
+					if(trajectory.get(k).getX() <= (_tpt.x - per*(_tpt.x - sling.x)))
 					{
 						traj_to_target.add(trajectory.get(k));
 					}
@@ -301,16 +324,24 @@ public Point COM4(BufferedImage screenshot)
 						break;
 				
 			}
-		
-			
-			
+			Point tapPoint = new Point();
+			tapPoint.x  =(int) trajectory.get(k).getX();
+			tapPoint.y  = (int)  trajectory.get(k).getY();
+
 			//for(int k= 0; k<s1; k++)
 			System.out.print(traj_to_target.size() + "  much of   " + trajectory.size());
 			
 			double tap_interval = ((double)traj_to_target.size()/(double)trajectory.size())*100;
-			System.out.println("TAP : " + (int)tap_interval);
-			tap_interval -= 5;
-				return (int)tap_interval;
+			System.out.println(" TAP : " + (int)tap_interval);
+			int taptime = tp.getTimeByDistance(sling, pt, tapPoint);
+			/*if(tap_interval < 80)
+			{
+				tap_interval += tap_interval*(double)((100 - tap_interval)/100.0); 
+			}
+			*/
+			System.out.println(" TAP : " + taptime);
+			//tap_interval -= 5;
+				return taptime;
 }
 
 public ABObject Compute_Top(BufferedImage screenshot)
@@ -429,6 +460,8 @@ public ABObject Compute_Base(BufferedImage screenshot)
 					}
 				}
 			}
+			if(flg == 0)
+				return null;
 			return base;
 	}
 
@@ -488,7 +521,7 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 		{
 			if(block.getCenter().getX() <= _tpt.x)
 			{	
-				if(block.getY() < _tpt.y && Math.abs(block.getY() - _tpt.y) > 70) 
+				if(block.getY() < _tpt.y && Math.abs(block.getY() - _tpt.y) > 110) 
 				{
 					System.out.println("BLOCKING " + block.type +"  : "+  block.getX() + "   " + block.getY() + "DIff " + Math.abs(block.getCenter().getY() - _tpt.y));
 					flag = 1;
@@ -547,7 +580,9 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 					List<ABObject> blocks = MBR.findBlocks();
 					ABObject base = Compute_Base(screenshot);
 					int flg1 = 0;
-					for(ABObject blk : blocks)
+					
+					if(base != null)
+						for(ABObject blk : blocks)
 						if((base.getX() + base.width + 5 >= blk.getX()) && (base.getX() + base.width <= blk.getX()) || (blk.getX() >= base.getX() && blk.getX()  + blk.width <= base.getX() + base.width && blk.getY() < base.getY()))
 							{flg1 = 1;
 							break;	}
@@ -650,7 +685,8 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 						System.out.println("Release Angle: "
 								+ Math.toDegrees(releaseAngle));
 						System.out.println("HI");
-						int tapInterval = Compute_Tap_Interval(screenshot, releasePoint,sling, _tpt );
+						int tapTime = Compute_Tap_Interval(screenshot, releasePoint,sling, _tpt );
+						
 						/*
 						switch (aRobot.getBirdTypeOnSling()) 
 						{
@@ -669,7 +705,7 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 							tapInterval =  60;
 						}
 						*/
-						int tapTime = tp.getTapTime(sling, releasePoint, _tpt, tapInterval);
+						//int tapTime = tp.getTapTime(sling, releasePoint, _tpt, tapInterval);
 						dx = (int)releasePoint.getX() - refPoint.x;
 						dy = (int)releasePoint.getY() - refPoint.y;
 						shot = new Shot(refPoint.x, refPoint.y, dx, dy, 0, tapTime);
