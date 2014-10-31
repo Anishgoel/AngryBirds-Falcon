@@ -623,7 +623,7 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 						mass[1] = 4;
 						mass[2] = 3;
 						mass[3] = 11;
-						COM= COM2(screenshot, mass);
+						COM= COM4(screenshot);
 					System.out.println("com : " + COM.x + "    --   " + COM.y);
 					}
 					
@@ -667,7 +667,6 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 						}
 					/*
 					 List<Point> trajectory = tp.predictTrajectory(sling, releasePoint);
-
 					for(int k= 0; k<trajectory.size(); k++)
 					{
 						System.out.println(trajectory.get(k).getX() + " " + trajectory.get(k).getY());
@@ -690,7 +689,6 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 						/*
 						switch (aRobot.getBirdTypeOnSling()) 
 						{
-
 						case RedBird:
 							tapInterval = 0; break;               // start of trajectory
 						case YellowBird:
@@ -764,8 +762,3 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 
 	}
 }
-
-
-
-
-
