@@ -173,7 +173,7 @@ public Point COM4(BufferedImage screenshot)
 		double m_wood  = (total_mass[1]/woods.size());
 		double m_ice   = (total_mass[2]/ice.size());
 		double m_pig   = 3*total_mass[3]/pigs.size();
-		System.out.println("Stone : " +m_stone + " Wood " + m_wood + " Ice "+ m_ice + " Pig " + m_pig);
+		//System.out.println("Stone : " +m_stone + " Wood " + m_wood + " Ice "+ m_ice + " Pig " + m_pig);
 		totalMass = 0;
 		for(Rectangle stone :stones)
 		{
@@ -332,14 +332,14 @@ public Point COM4(BufferedImage screenshot)
 			System.out.print(traj_to_target.size() + "  much of   " + trajectory.size());
 			
 			double tap_interval = ((double)traj_to_target.size()/(double)trajectory.size())*100;
-			System.out.println(" TAP : " + (int)tap_interval);
+			//System.out.println(" TAP : " + (int)tap_interval);
 			int taptime = tp.getTimeByDistance(sling, pt, tapPoint);
 			/*if(tap_interval < 80)
 			{
 				tap_interval += tap_interval*(double)((100 - tap_interval)/100.0); 
 			}
 			*/
-			System.out.println(" TAP : " + taptime);
+			//System.out.println(" TAP : " + taptime);
 			//tap_interval -= 5;
 				return taptime;
 }
@@ -378,11 +378,11 @@ public ABObject Compute_Top(BufferedImage screenshot)
 		
 		
 		System.out.println("No of tops " + TOPS.size());
-		for(ABObject bas : TOPS)
+		/*for(ABObject bas : TOPS)
 		{
 
 			System.out.println(bas.type + "   " + bas.width + "   " + bas.height + "    " +  bas.getX() + "   " + bas.getY());
-		}
+		}*/
 		if(TOPS.size() == 0)
 			return null;
 
@@ -428,10 +428,10 @@ public ABObject Compute_Base(BufferedImage screenshot)
 
 		}
 
-			for(ABObject bas : BASES)
+			/*for(ABObject bas : BASES)
 			{
 				System.out.println(bas.type + "   " + bas.width + "   " +  bas.getX() + "   " + bas.getY());
-			}
+			}*/
 
 			
 			for(ABObject bas : BASES)
@@ -481,7 +481,7 @@ public Point COM_Check(BufferedImage screenshot, Point COM)
 
 			// pick the max height pig
 		double min = distance(COM, P);
-		System.out.println("min" + min);
+		//System.out.println("min" + min);
 		
 		for(ABObject pig : pigs)
 		{
@@ -523,7 +523,7 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 			{	
 				if(block.getY() < _tpt.y && Math.abs(block.getY() - _tpt.y) > 110) 
 				{
-					System.out.println("BLOCKING " + block.type +"  : "+  block.getX() + "   " + block.getY() + "DIff " + Math.abs(block.getCenter().getY() - _tpt.y));
+				//	System.out.println("BLOCKING " + block.type +"  : "+  block.getX() + "   " + block.getY() + "DIff " + Math.abs(block.getCenter().getY() - _tpt.y));
 					flag = 1;
 					break;
 				}
@@ -593,14 +593,14 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 					if(top != null)
 						flg2 = 1;
 					
-					System.out.println("FLg 1 :" + flg1 + "FLG 2 : "+ flg2);
+					//System.out.println("FLg 1 :" + flg1 + "FLG 2 : "+ flg2);
 					if(flg1 == 1 && flg2 == 1)
 					{
-						System.out.println("BASE " + base.width + "  " + "TOP "+ top.width);
+					//	System.out.println("BASE " + base.width + "  " + "TOP "+ top.width);
 						if(base.width <= top.width)
 							{
 								 flg2 = 0;
-								System.out.println("Select base over top");
+						//		System.out.println("Select base over top");
 							}
 					}
 					if(flg2 == 1)
@@ -612,7 +612,7 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 					else if(flg1 == 1)
 					{	COM.x = (int)base.getX();
 						COM.y = (int)base.getY();
-						System.out.println(base.type + "   " + COM.x  + "   ---BASE---   " + COM.y);
+						//System.out.println(base.type + "   " + COM.x  + "   ---BASE---   " + COM.y);
 						}
 					else 
 					{
@@ -624,7 +624,7 @@ public int Select_Trajectory(BufferedImage screenshot, Point _tpt)
 						mass[2] = 3;
 						mass[3] = 11;
 						COM= COM4(screenshot);
-					System.out.println("com : " + COM.x + "    --   " + COM.y);
+					//System.out.println("com : " + COM.x + "    --   " + COM.y);
 					}
 					
 					
