@@ -285,62 +285,74 @@ public Point COM4(BufferedImage screenshot)
 		List<ABObject> pigs = vision.findPigsMBR();
 		List<ABObject> blocks = MBR.findBlocks();
 		System.out.println("IN TAP " + _tpt.x);
-
+		int min_x = MBR._nWidth;
 		for(ABObject blk : blocks)
 		{
-			if(blk.getX() < _tpt.x)
+			if(blk.getX() < min_x)
 			{
-				if(blk.getY() <= _tpt.y && blk.getY()  + blk.height  >= _tpt.y)
-					_tpt.x = (int)blk.getX();
-			}	
+				min_x = (int)blk.getX();
+			}
 		}
-	System.out.println("IN TAP " + _tpt.x);			
 		List<Point> trajectory = tp.predictTrajectory(sling, pt);
 		
 		List<Point> traj_to_target = new LinkedList<Point>();
 			int k= 0;
-			double per = 0.10;
+			double per = 0.15;
 			switch (aRobot.getBirdTypeOnSling()) 
 						{
 
 						case RedBird:
-							per = 0; break;               // start of trajectory
+							per = 0; break;    
 						case YellowBird:
-							per = 0.2 ; break; // 65-90% of the way
+							per = 0.15 ; break; 
 						case BlueBird:
-							per = 0.1;  break; // 60-70% of the way
+							per = 0.15;  break; 
 						default:
-							per =  0.1;
+							per =  0.15;
 						}
 			for(k= 0; k<trajectory.size(); k++)
 			{
 
-	
-					if(trajectory.get(k).getX() <= (_tpt.x - per*(_tpt.x - sling.x)))
-					{
-						traj_to_target.add(trajectory.get(k));
-					}
-					else
-						break;
-				
+						if(trajectory.get(k).getX() >= min_x)
+							break;
 			}
-			Point tapPoint = new Point();
-			tapPoint.x  =(int) trajectory.get(k).getX();
-			tapPoint.y  = (int)  trajectory.get(k).getY();
-
-			//for(int k= 0; k<s1; k++)
-			System.out.print(traj_to_target.size() + "  much of   " + trajectory.size());
-			
-			double tap_interval = ((double)traj_to_target.size()/(double)trajectory.size())*100;
-			//System.out.println(" TAP : " + (int)tap_interval);
-			int taptime = tp.getTimeByDistance(sling, pt, tapPoint);
-			/*if(tap_interval < 80)
+			int p = k;
+			for(p = k ; p<trajectory.size(); p++)
 			{
-				tap_interval += tap_interval*(double)((100 - tap_interval)/100.0); 
+				int jk = 0;
+						for(ABObject blk : blocks)
+						{
+							if(trajectory.get(p).getX() >= blk.getX() && trajectory.get(p).getX() <= blk.getX() + blk.width && trajectory.get(p).getY() >= blk.getY() && trajectory.get(p).getY() <= blk.getY() + blk.height)
+							{			
+								jk = 1;
+	
+										break;
+							}
+					}
+					if(jk == 1)
+					{
+						break;
+					}
 			}
-			*/
-			//System.out.println(" TAP : " + taptime);
-			//tap_interval -= 5;
+
+			Point tapPoint = new Point();
+			if(p == trajectory.size())
+			{
+				tapPoint.x  =(int) _tpt.x;
+				tapPoint.y  = (int)  _tpt.y;
+				tapPoint.x -= per*(tapPoint.x - sling.x);
+			}
+			else
+			{
+			System.out.println("Tap Point: " + tapPoint.x + "  " + tapPoint.y);
+			tapPoint.x  =(int) trajectory.get(p).getX();
+			tapPoint.y  = (int)  trajectory.get(p).getY();
+			tapPoint.x -= per*(tapPoint.x - sling.x);
+			}
+			double tap_interval = ((double)traj_to_target.size()/(double)trajectory.size())*100;
+			System.out.println(" TAP : " + (int)tap_interval);
+			int taptime = tp.getTimeByDistance(sling, pt, tapPoint);
+			System.out.println(" TAP : " + taptime);
 				return taptime;
 }
 
